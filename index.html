@@ -89,6 +89,9 @@ footer a{text-decoration:none;color:var(--mut)}footer a:hover{color:var(--fg)}
 .tm{font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-top:5px;font-weight:600;font-variant-numeric:tabular-nums}
 .t-g{color:#22c55e}.t-o{color:#f97316}.t-r{color:#ef4444}.t-end{color:var(--mut)}
 .row.ended .n{opacity:.45}.row.ended .pr b{opacity:.45}
+.inf{margin-top:6px;font-size:13px;color:#a8a8a8;line-height:1.5;max-width:420px}
+input.inp{flex:1 1 100%;width:100%;max-width:100%;text-align:left;font-size:13px;margin-top:6px}
+.row.ended .inf{opacity:.45}
 </style>
 </head>
 <body>
@@ -132,7 +135,7 @@ h+='<h2>'+esc(c)+'</h2>';
 data.services.filter(function(s){return s.cat===c}).forEach(function(s){
 var off=s.old>s.price?Math.round((1-s.price/s.old)*100):0;
 var gone=s.until&&s.until<=Date.now();
-h+='<div class="row'+(gone?' ended':'')+'"><div><div class="n">'+esc(s.name)+(BADGES[s.badge]?'<span class="bd bd-'+s.badge+'">'+BADGES[s.badge]+'</span>':'')+'</div>'+(s.until?'<div class="tm" data-u="'+s.until+'"></div>':'')+'</div><div class="r"><div class="pr"><small>QUANTITY</small><b>'+num(s.qty)+'</b></div><div class="pr"><small>PRICE</small>'+(off?'<s class="was">'+money(s.old)+'</s> <span class="off">-'+off+'%</span><br>':'')+'<b'+(off?' class="dc"':'')+'>'+money(s.price)+'</b></div>'+
+h+='<div class="row'+(gone?' ended':'')+'"><div><div class="n">'+esc(s.name)+(BADGES[s.badge]?'<span class="bd bd-'+s.badge+'">'+BADGES[s.badge]+'</span>':'')+'</div>'+(s.info?'<div class="inf">'+esc(s.info)+'</div>':'')+(s.until?'<div class="tm" data-u="'+s.until+'"></div>':'')+'</div><div class="r"><div class="pr"><small>QUANTITY</small><b>'+num(s.qty)+'</b></div><div class="pr"><small>PRICE</small>'+(off?'<s class="was">'+money(s.old)+'</s> <span class="off">-'+off+'%</span><br>':'')+'<b'+(off?' class="dc"':'')+'>'+money(s.price)+'</b></div>'+
 (data.contact&&!gone?'<a class="btn" target="_blank" rel="noopener" href="'+esc(data.contact)+'">Order</a>':'')+'</div></div>'});
 });
 h+='<footer><span class="fb">ACLLC SOCIAL BOOST</span><span class="fc">All payments are secured by Stripe</span><span class="fr"><a href="https://www.instagram.com/achdouzcompany/" target="_blank" rel="noopener">Instagram</a><a href="#/refund" id="rf">Refund Policy</a></span></footer><div class="cr">&copy; ACLLC 2026 — All rights reserved</div>';
@@ -152,7 +155,7 @@ h+='<p>Edit name, quantity and price, add or remove services, then press Save. T
 cats(draft.services).forEach(function(c){
 h+='<h2>'+esc(c)+'</h2>';
 draft.services.forEach(function(s,i){if(s.cat!==c)return;
-h+='<div class="row"><div class="fld"><input class="t" data-i="'+i+'" data-k="name" value="'+esc(s.name)+'"></div><div class="fld"><label>QTY</label><input type="number" min="1" step="1" data-i="'+i+'" data-k="qty" value="'+s.qty+'"><label>US$</label><input type="number" min="0" step="0.01" data-i="'+i+'" data-k="price" value="'+s.price+'"><label>WAS</label><input type="number" min="0" step="0.01" data-i="'+i+'" data-k="old" value="'+(s.old||'')+'"><label>ENDS</label><input type="datetime-local" data-i="'+i+'" data-k="until" value="'+dt(s.until)+'" style="width:210px;text-align:left"><select data-i="'+i+'" data-k="badge">'+badgeOpts(s.badge)+'</select><button class="btn x" data-del="'+i+'">Delete</button></div></div>'});
+h+='<div class="row"><div class="fld"><input class="t" data-i="'+i+'" data-k="name" value="'+esc(s.name)+'"></div><div class="fld"><label>QTY</label><input type="number" min="1" step="1" data-i="'+i+'" data-k="qty" value="'+s.qty+'"><label>US$</label><input type="number" min="0" step="0.01" data-i="'+i+'" data-k="price" value="'+s.price+'"><label>WAS</label><input type="number" min="0" step="0.01" data-i="'+i+'" data-k="old" value="'+(s.old||'')+'"><label>ENDS</label><input type="datetime-local" data-i="'+i+'" data-k="until" value="'+dt(s.until)+'" style="width:210px;text-align:left"><select data-i="'+i+'" data-k="badge">'+badgeOpts(s.badge)+'</select><input class="inp" data-i="'+i+'" data-k="info" maxlength="200" placeholder="Package info shown on the page (optional)" value="'+esc(s.info||'')+'"><button class="btn x" data-del="'+i+'">Delete</button></div></div>'});
 h+='<div class="add"><button class="btn" data-add="'+esc(c)+'">Add service to '+esc(c)+'</button></div>'});
 h+='<h2>New platform</h2><div class="row"><div class="fld"><input class="t" id="np" placeholder="Platform name, e.g. Twitter"><button class="btn" id="npb">Add platform</button></div></div>';
 h+='<h2>Top banner</h2><div class="row"><div class="fld"><input class="t" id="bn" maxlength="160" placeholder="Banner text (empty hides it)" style="width:340px;max-width:100%" value="'+esc(draft.banner.text||'')+'"><select id="bs">'+['white','red','green','amber','blue'].map(function(c){return '<option value="'+c+'"'+(draft.banner.style===c?' selected':'')+'>'+c.charAt(0).toUpperCase()+c.slice(1)+'</option>'}).join('')+'</select></div></div>';
@@ -161,7 +164,7 @@ h+='<div class="bar"><button class="btn s" id="save">Save changes</button><butto
 app.innerHTML=h;wire();
 app.querySelectorAll("input[data-k],select[data-k]").forEach(function(el){el.oninput=el.onchange=function(){
 var s=draft.services[el.dataset.i],k=el.dataset.k;
-s[k]=(k==="name"||k==="badge")?el.value:k==="until"?(el.value?new Date(el.value).getTime():0):(parseFloat(el.value)||0)}});
+s[k]=(k==="name"||k==="badge"||k==="info")?el.value:k==="until"?(el.value?new Date(el.value).getTime():0):(parseFloat(el.value)||0)}});
 app.querySelectorAll("[data-del]").forEach(function(b){b.onclick=function(){draft.services.splice(+b.dataset.del,1);admin()}});
 app.querySelectorAll("[data-add]").forEach(function(b){b.onclick=function(){draft.services.push({id:"s"+Date.now(),cat:b.dataset.add,name:"New service",qty:1000,price:1});admin()}});
 document.getElementById("npb").onclick=function(){var v=document.getElementById("np").value.trim();if(!v)return;draft.services.push({id:"s"+Date.now(),cat:v,name:"New service",qty:1000,price:1});admin()};
@@ -172,7 +175,7 @@ document.getElementById("reset").onclick=function(){draft=clone(DEF);write(clone
 document.getElementById("so").onclick=function(){fbLogout()};
 }
 function write(o){
-o.services=o.services.filter(function(s){return s.name&&s.cat}).map(function(s){return{id:s.id,cat:s.cat,name:s.name,qty:Math.max(1,Math.round(s.qty)||1000),price:Math.max(0,Math.round(s.price*100)/100||0),old:Math.max(0,Math.round((s.old||0)*100)/100),badge:BADGES[s.badge]?s.badge:"",until:Math.max(0,Math.round(s.until||0))}});
+o.services=o.services.filter(function(s){return s.name&&s.cat}).map(function(s){return{id:s.id,info:String(s.info||"").trim().slice(0,200),cat:s.cat,name:s.name,qty:Math.max(1,Math.round(s.qty)||1000),price:Math.max(0,Math.round(s.price*100)/100||0),old:Math.max(0,Math.round((s.old||0)*100)/100),badge:BADGES[s.badge]?s.badge:"",until:Math.max(0,Math.round(s.until||0))}});
 var bb=o.banner||{};o.banner={text:String(bb.text||'').trim().slice(0,160),style:['white','red','green','amber','blue'].indexOf(bb.style)>=0?bb.style:'white'};
 setSt("Saving...");
 fbSet(o).then(function(){data=o;setSt("Saved. Live on the landing page.")}).catch(function(e){setSt("Save failed: "+(e&&e.message||"error"))});
