@@ -113,7 +113,7 @@ var DEF={contact:"",banner:{text:"",style:"white"},services:[
 {id:"s7",cat:"Facebook",name:"Facebook Page Likes",qty:1000,price:2.5},
 {id:"s8",cat:"TikTok",name:"TikTok Views",qty:1000,price:0.4},
 {id:"s9",cat:"TikTok",name:"TikTok Followers",qty:1000,price:3.5}]};
-var data=clone(DEF),draft=null,filter="all",db=null,docRef=null,canEdit=false,ready=false,view="home",status="";
+var data=clone(DEF),draft=null,filter="all",db=null,docRef=null,canEdit=false,ready=false,loaded=false,loadErr=false,dirty=false,view="home",status="";
 var app=document.getElementById("app");
 function clone(o){return JSON.parse(JSON.stringify(o))}
 function esc(s){return String(s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;")}
@@ -155,7 +155,9 @@ if(!ready){app.innerHTML=h+'<p>Loading...</p></div>';wire();return}
 if(!canEdit){app.innerHTML=h+'<p>Sign in to manage services.</p><div class="fld" style="flex-direction:column;align-items:flex-start;gap:12px"><input class="w" id="em" type="email" placeholder="Email" autocomplete="username"><input class="w" id="pw" type="password" placeholder="Password" autocomplete="current-password"><button class="btn s" id="li">Sign in</button><span class="st" id="st"></span></div></div>';wire();
 var go=function(){if(!window.fbLogin){setSt("Firebase did not load. Check your connection and try again.");return}setSt("Signing in...");fbLogin(document.getElementById("em").value.trim(),document.getElementById("pw").value).catch(function(){setSt("Wrong email or password.")})};
 document.getElementById("li").onclick=go;document.getElementById("pw").onkeydown=function(e){if(e.key==="Enter")go()};return}
-if(!draft)draft=clone(data);if(!draft.banner)draft.banner={text:'',style:'white'};
+if(loadErr){app.innerHTML=h+'<div class="box">Could not load your saved data from Firebase, so editing is disabled to avoid overwriting it. Check your connection and the Firestore rules, then reload.</div></div>';wire();return}
+if(!loaded){app.innerHTML=h+'<p>Loading your saved data...</p></div>';wire();return}
+if(!draft){draft=clone(data);dirty=false}if(!draft.banner)draft.banner={text:'',style:'white'};
 h+='<p>Edit name, quantity and price, add or remove services, then press Save. The landing page updates in real time.</p>';
 cats(draft.services).forEach(function(c){
 h+='<h2>'+esc(c)+'</h2>';
@@ -170,9 +172,9 @@ app.innerHTML=h;wire();
 app.querySelectorAll("input[data-k],select[data-k]").forEach(function(el){el.oninput=el.onchange=function(){
 var s=draft.services[el.dataset.i],k=el.dataset.k;
 s[k]=(k==="name"||k==="badge"||k==="info")?el.value:k==="until"?(el.value?new Date(el.value).getTime():0):(parseFloat(el.value)||0)}});
-app.querySelectorAll("[data-del]").forEach(function(b){b.onclick=function(){draft.services.splice(+b.dataset.del,1);admin()}});
-app.querySelectorAll("[data-add]").forEach(function(b){b.onclick=function(){draft.services.push({id:"s"+Date.now(),cat:b.dataset.add,name:"New service",qty:1000,price:1});admin()}});
-document.getElementById("npb").onclick=function(){var v=document.getElementById("np").value.trim();if(!v)return;draft.services.push({id:"s"+Date.now(),cat:v,name:"New service",qty:1000,price:1});admin()};
+app.querySelectorAll("[data-del]").forEach(function(b){b.onclick=function(){dirty=true;draft.services.splice(+b.dataset.del,1);admin()}});
+app.querySelectorAll("[data-add]").forEach(function(b){b.onclick=function(){dirty=true;draft.services.push({id:"s"+Date.now(),cat:b.dataset.add,name:"New service",qty:1000,price:1});admin()}});
+document.getElementById("npb").onclick=function(){var v=document.getElementById("np").value.trim();if(!v)return;dirty=true;draft.services.push({id:"s"+Date.now(),cat:v,name:"New service",qty:1000,price:1});admin()};
 document.getElementById("bn").oninput=function(e){draft.banner.text=e.target.value};document.getElementById("bs").onchange=function(e){draft.banner.style=e.target.value};
 document.getElementById("contact").oninput=function(e){draft.contact=e.target.value.trim()};
 document.getElementById("save").onclick=function(){write(clone(draft))};
@@ -183,7 +185,7 @@ function write(o){
 o.services=o.services.filter(function(s){return s.name&&s.cat}).map(function(s){return{id:s.id,info:String(s.info||"").trim().slice(0,200),cat:s.cat,name:s.name,qty:Math.max(1,Math.round(s.qty)||1000),price:Math.max(0,Math.round(s.price*100)/100||0),old:Math.max(0,Math.round((s.old||0)*100)/100),badge:BADGES[s.badge]?s.badge:"",until:Math.max(0,Math.round(s.until||0))}});
 var bb=o.banner||{};o.banner={text:String(bb.text||'').trim().slice(0,160),style:['white','red','green','amber','blue'].indexOf(bb.style)>=0?bb.style:'white'};
 setSt("Saving...");
-fbSet(o).then(function(){data=o;setSt("Saved. Live on the landing page.")}).catch(function(e){setSt("Save failed: "+(e&&e.message||"error"))});
+fbSet(o).then(function(){data=o;dirty=false;setSt("Saved. Live on the landing page.")}).catch(function(e){setSt("Save failed: "+(e&&e.message||"error"))});
 }
 function setSt(t){status=t;var e=document.getElementById("st");if(e)e.textContent=t}
 function refund(){
@@ -207,6 +209,7 @@ el.textContent="Ends in "+(d?d+"d ":"")+p(h)+":"+p(m)+":"+p(x);
 el.className="tm "+(left<3600?"t-r":left<86400?"t-o":"t-g")})}
 setInterval(tick,1000);
 function render(){var r=route();r==="admin"?admin():r==="refund"?refund():(home(),tick())}
+app.addEventListener("input",function(){if(route()==="admin"&&draft)dirty=true});
 window.addEventListener("hashchange",function(){draft=null;render()});
 render();
 setTimeout(function(){if(!ready){ready=true;render()}},3000);
@@ -223,8 +226,9 @@ window.fbLogin=function(e,p){return signInWithEmailAndPassword(auth,e,p)};
 window.fbLogout=function(){return signOut(auth)};
 onSnapshot(ref,function(s){
 if(s.exists()){var d=s.data();if(d.services&&d.services.length)window.data={contact:d.contact||"",banner:d.banner||{text:"",style:"white"},services:d.services}}
-if(route()!=="admin"||!window.draft)render();
-},function(err){console.error("Firestore:",err)});
+window.loaded=true;window.loadErr=false;
+if(route()!=="admin"||!window.dirty){window.draft=null;render()}
+},function(err){console.error("Firestore:",err);window.loadErr=true;render()});
 onAuthStateChanged(auth,function(u){window.canEdit=!!u;window.ready=true;window.draft=null;render()});
 </script>
 </body>
