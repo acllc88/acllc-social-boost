@@ -97,6 +97,7 @@ footer a{text-decoration:none;color:var(--mut)}footer a:hover{color:var(--fg)}
 .inf{margin-top:6px;font-size:13px;color:#a8a8a8;line-height:1.5;max-width:420px}
 input.inp{flex:1 1 100%;width:100%;max-width:100%;text-align:left;font-size:13px;margin-top:6px}
 .row.ended .inf{opacity:.45}
+.cr a{color:var(--fg);text-decoration:none;border-bottom:1px solid var(--mut)}.cr a:hover{border-bottom-color:var(--fg)}
 </style>
 </head>
 <body>
@@ -143,7 +144,7 @@ var gone=s.until&&s.until<=Date.now();
 h+='<div class="row'+(gone?' ended':'')+'"><div><div class="n">'+esc(s.name)+(BADGES[s.badge]?'<span class="bd bd-'+s.badge+'">'+BADGES[s.badge]+'</span>':'')+'</div>'+(s.info?'<div class="inf">'+esc(s.info)+'</div>':'')+(s.until?'<div class="tm" data-u="'+s.until+'"></div>':'')+'</div><div class="r"><div class="pr"><small>QUANTITY</small><b>'+num(s.qty)+'</b></div><div class="pr"><small>PRICE</small>'+(off?'<s class="was">'+money(s.old)+'</s> <span class="off">-'+off+'%</span><br>':'')+'<b'+(off?' class="dc"':'')+'>'+money(s.price)+'</b></div>'+
 (data.contact&&!gone?'<a class="btn" target="_blank" rel="noopener" href="'+esc(data.contact)+'">Order</a>':'')+'</div></div>'});
 });
-h+='<footer><span class="fb">ACLLC SOCIAL BOOST</span><span class="fc">All payments are secured by Stripe</span><span class="fr"><a href="https://www.instagram.com/achdouzcompany/" target="_blank" rel="noopener">Instagram</a><a href="#/refund" id="rf">Refund Policy</a></span></footer><div class="cr">&copy; ACLLC 2026 — All rights reserved</div>';
+h+='<footer><span class="fb">ACLLC SOCIAL BOOST</span><span class="fc">All payments are secured by Stripe</span><span class="fr"><a href="https://www.instagram.com/achdouzcompany/" target="_blank" rel="noopener">Instagram</a><a href="#/refund" id="rf">Refund Policy</a></span></footer><div class="cr">&copy; <a href="https://acllc.vercel.app/" target="_blank" rel="noopener">ACLLC 2026</a> — All rights reserved</div>';
 app.innerHTML=h;
 wire();app.querySelectorAll(".chip").forEach(function(b){b.onclick=function(){filter=b.dataset.f;render()}});
 }
@@ -197,7 +198,7 @@ var h=nav()+'<div class="pol"><small>LEGAL</small><h1>Refund Policy</h1>'+
 '<h3>Pricing</h3><p>All package prices are not final. Prices change over time throughout the day. The price shown when you place your order is the price you pay.</p>'+
 '<h3>Payments</h3><p>All payments are processed through Stripe, a trusted payment gateway. ACLLC does not store or have access to your full card details.</p>'+
 '<a class="btn" id="bk" href="#/">Back to services</a></div>'+
-'<footer><span class="fb">ACLLC SOCIAL BOOST</span><span class="fc">All payments are secured by Stripe</span><span class="fr"><a href="https://www.instagram.com/achdouzcompany/" target="_blank" rel="noopener">Instagram</a></span></footer><div class="cr">&copy; ACLLC 2026 — All rights reserved</div>';
+'<footer><span class="fb">ACLLC SOCIAL BOOST</span><span class="fc">All payments are secured by Stripe</span><span class="fr"><a href="https://www.instagram.com/achdouzcompany/" target="_blank" rel="noopener">Instagram</a></span></footer><div class="cr">&copy; <a href="https://acllc.vercel.app/" target="_blank" rel="noopener">ACLLC 2026</a> — All rights reserved</div>';
 app.innerHTML=h;wire();
 document.getElementById("bk").onclick=function(e){e.preventDefault();view="home";location.hash="#/";render();window.scrollTo(0,0)};
 }
