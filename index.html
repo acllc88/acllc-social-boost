@@ -227,7 +227,7 @@ window.fbSet=function(o){return setDoc(ref,o)};
 window.fbLogin=function(e,p){return signInWithEmailAndPassword(auth,e,p)};
 window.fbLogout=function(){return signOut(auth)};window.fbUpdateOrderStatus=function(id,status){return updateDoc(doc(fs,"orders",id),{status:status,updatedAt:Date.now()})};window.fbCreateOrder=function(o){if(!auth.currentUser)return Promise.resolve();return import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js").then(function(m){return m.addDoc(collection(fs,"orders"),Object.assign(o,{userId:auth.currentUser.uid,createdAt:m.serverTimestamp()}))})};
 onSnapshot(ref,function(s){
-if(s.exists()){var d=s.data();if(d.services&&d.services.length)window.data={contact:d.contact||"",banner:d.banner||{text:"",style:"white"},services:d.services}}
+if(s.exists()){var d=s.data();if(d.services&&d.services.length){data={contact:d.contact||"",banner:d.banner||{text:"",style:"white"},services:d.services};window.data=data}}
 window.loaded=true;window.loadErr=false;
 if(route()!=="admin"||!window.dirty){window.draft=null;render()}
 },function(err){console.error("Firestore:",err);window.loadErr=true;render()});
