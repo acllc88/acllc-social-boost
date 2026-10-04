@@ -20,7 +20,7 @@ module.exports = async function handler(req, res) {
     const service = SERVICES[String(serviceId)]
     const units = Number(quantity)
     if (!service || !Number.isInteger(units) || units < 1 || units > 100) return res.status(400).json({ error: 'Invalid service or quantity' })
-    if (customerEmail && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(customerEmail)) return res.status(400).json({ error: 'Invalid email' })
+    if (customerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) return res.status(400).json({ error: 'Invalid email' })
     const origin = req.headers.origin || 'https://acllcsocialboost.vercel.app'
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
