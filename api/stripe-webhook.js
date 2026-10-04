@@ -5,7 +5,13 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
   const signature = req.headers['stripe-signature']
   try {
-    const event = stripe.webhooks.constructEvent(req.body, signature, process.env.STRIPE_WEBHOOK_SECRET)
+    const rawBody = Buffer.isBuffer(req.body) ? req.body : typeof req.body === 'string' ? req.body : await new Promise((resolve, reject) => {
+      const chunks = []
+      req.on('data', chunk => chunks.push(Buffer.from(chunk)))
+      req.on('end', () => resolve(Buffer.concat(chunks)))
+      req.on('error', reject)
+    })
+    const event = stripe.webhooks.constructEvent(rawBody, signature, process.env.STRIPE_WEBHOOK_SECRET)
     if (event.type === 'checkout.session.completed' || event.type === 'checkout.session.async_payment_succeeded') {
       const session = event.data.object
       if (session.payment_status === 'paid') {
