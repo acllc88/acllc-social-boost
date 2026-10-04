@@ -1,0 +1,24 @@
+{
+  "name": "v0-project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/acllc88/acllc-social-boost.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/acllc88/acllc-social-boost/issues"
+  },
+  "homepage": "https://github.com/acllc88/acllc-social-boost#readme",
+  "dependencies": {
+    "stripe": "^23.0.0"
+  }
+}
